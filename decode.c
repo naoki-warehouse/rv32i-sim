@@ -1,19 +1,21 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "utils.h"
 #include "inst.h"
 
 
-static uint8_t get_funct7(uint32_t inst){ return (inst>>25); }
-static uint8_t get_rs2(uint32_t inst){ return (inst>>20)&0b11111; }
-static uint8_t get_rs1(uint32_t inst){ return (inst>>15)&0b11111; }
-static uint8_t get_funct3(uint32_t inst){ return (inst>>12)&0b111; }
-static uint8_t get_rd(uint32_t inst){ return (inst>>7)&0b11111; }
-static uint8_t get_opcode(uint32_t inst){ return inst&0b1111111; }
-static uint16_t get_imm_11_0(uint32_t inst){ return inst>>20; }
-static uint8_t get_imm_11_5(uint32_t inst){ return inst>>25; }
-static uint8_t get_imm_4_0(uint32_t inst){ return (inst>>7)&0b11111; }
-static uint32_t get_imm_31_12(uint32_t inst){ return inst>>12; }
+
+static uint8_t get_funct7(uint32_t inst){ return (uint8_t)get_bits(inst,25, 31); }
+static uint8_t get_rs2(uint32_t inst){ return (uint8_t)get_bits(inst, 20, 24); }
+static uint8_t get_rs1(uint32_t inst){ return (uint8_t)get_bits(inst, 15, 19); }
+static uint8_t get_funct3(uint32_t inst){ return (uint8_t)get_bits(inst, 12, 14); }
+static uint8_t get_rd(uint32_t inst){ return (uint8_t)get_bits(inst, 7, 11); }
+static uint8_t get_opcode(uint32_t inst){ return (uint8_t)get_bits(inst, 0, 6); }
+static uint16_t get_imm_11_0(uint32_t inst){ return (uint16_t)get_bits(inst, 20, 31); }
+static uint8_t get_imm_11_5(uint32_t inst){ return (uint8_t)get_bits(inst, 25, 31); }
+static uint8_t get_imm_4_0(uint32_t inst){ return (uint8_t)get_bits(inst, 7, 11); }
+static uint32_t get_imm_31_12(uint32_t inst){ return (uint32_t)get_bits(inst, 12, 31); }
 
 int decode_get_type(uint32_t inst){
 

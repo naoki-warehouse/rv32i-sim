@@ -32,4 +32,5 @@ struct u_type {
     uint8_t rd :5;
     uint8_t opcode :7;
 };
+
 #endif

@@ -20,6 +20,9 @@ static uint32_t get_imm_31_12(uint32_t inst){ return (uint32_t)get_bits(inst, 12
 int decode_get_type(uint32_t inst){
 
 }
+uint8_t decode_get_opcode(uint32_t inst){
+    return get_opcode(inst);
+}
 
 void decode_get_r_type(uint32_t inst, struct r_type *r){
 }

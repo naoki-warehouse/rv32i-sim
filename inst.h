@@ -33,4 +33,18 @@ struct u_type {
     uint8_t opcode :7;
 };
 
+enum inst_opcode {
+    OP_IMM = 0b0010011,
+    OP_LUI = 0b0110111,
+    OP_AUIPC = 0b0010111,
+    OP_OP = 0b0110011,
+    OP_JAL = 0b1101111,
+    OP_JALR = 0b1100111,
+    OP_BRANCH = 0b1100011,
+    OP_LOAD = 0b0000011,
+    OP_STORE = 0b0100011,
+    OP_MISC_MEM = 0b0001111,
+    OP_SYSTEM = 0b1110011,
+};
+
 #endif

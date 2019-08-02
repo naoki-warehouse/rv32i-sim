@@ -37,14 +37,34 @@ int main(){
                     cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1] + imm;
                     break;
                 case FUNCT3_SLTI:
+                    printf("SLTI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
+                    int32_t imm_s = (int32_t)imm;
+                    int32_t reg_s = (int32_t)cpu.reg[i_inst.rs1];
+                    if(reg_s < imm_s) {
+                        cpu.reg[i_inst.rd] = 1;
+                    }else{
+                        cpu.reg[i_inst.rd] = 0;
+                    }
                     break;
                 case FUNCT3_SLTIU:
+                    printf("SLTIU: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
+                    if(cpu.reg[i_inst.rs1] < imm){
+                        cpu.reg[i_inst.rd] = 1;
+                    }else{
+                        cpu.reg[i_inst.rd] = 0;
+                    }
                     break;
                 case FUNCT3_ANDI:
+                    printf("ANDI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
+                    cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]&imm;
                     break;
                 case FUNCT3_ORI:
+                    printf("ORI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
+                    cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]|imm;
                     break;
                 case FUNCT3_XORI:
+                    printf("XORI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
+                    cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]^imm;
                     break;
                 default:
                     printf("Not Implemented!\n");

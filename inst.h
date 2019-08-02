@@ -71,7 +71,7 @@ enum funct3_opcode {
     FUNCT3_SH = 0b001,
     FUNCT3_SW = 0b010,
     FUNCT3_ADDI = 0b000,
-    FNUCT3_SLTI = 0b010,
+    FUNCT3_SLTI = 0b010,
     FUNCT3_SLTIU = 0b011,
     FUNCT3_XORI = 0b100,
     FUNCT3_ORI = 0b110,

@@ -38,6 +38,8 @@ void decode_get_s_type(uint32_t inst, struct s_type *s){
 }
 
 void decode_get_u_type(uint32_t inst, struct u_type *u){
+    u->rd = get_rd(inst);
+    u->opcode = get_opcode(inst);
 }
 
 void decode_get_b_type(uint32_t inst, struct b_type *i){
@@ -63,6 +65,8 @@ uint32_t decode_get_b_imm(uint32_t inst){
 }
 
 uint32_t decode_get_u_imm(uint32_t inst){
+    uint32_t v = get_bits(inst, 12, 31);
+    return v<<12;
 }
 
 uint32_t decode_get_j_imm(uint32_t inst){

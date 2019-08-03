@@ -88,6 +88,18 @@ int main(){
                     printf("Not Implemented!\n");
             }
             break;
+        case OP_LUI:
+            printf("OP_LUI\n");
+            struct u_type u_inst;
+            decode_get_u_type(inst, &u_inst);
+            uint32_t imm = decode_get_u_imm(inst);
+            cpu.reg[u_inst.rd] = imm;
+        case OP_AUIPC:
+            printf("OP_AUIPC\n");
+            struct u_type u_inst;
+            decode_get_u_type(inst, &u_inst);
+            uint32_t imm = decode_get_u_imm(inst);
+            cpu.reg[u_inst.rd] = cpu.pc + imm;
         default:
             printf("Not Implemented!\n");
     }

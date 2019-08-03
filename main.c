@@ -31,6 +31,7 @@ int main(){
     struct u_type u_inst;
     struct r_type r_inst;
     struct j_type j_inst;
+    struct b_type b_inst;
     int32_t rs1_s;
     int32_t rs2_s;
     uint8_t shamt;
@@ -94,7 +95,7 @@ int main(){
                 default:
                     printf("Not Implemented!\n");
             }
-            pc += 4;
+            cpu.pc += 4;
             break;
         case OP_LUI:
             printf("OP_LUI\n");
@@ -102,7 +103,7 @@ int main(){
             imm = decode_get_u_imm(inst);
             printf("LUI: imm:%d rd:%d\n", imm, u_inst.rd);
             cpu.reg[u_inst.rd] = imm;
-            pc += 4;
+            cpu.pc += 4;
             break;
         case OP_AUIPC:
             printf("OP_AUIPC\n");
@@ -110,7 +111,7 @@ int main(){
             imm = decode_get_u_imm(inst);
             printf("AUIPC: imm:%d rd:%d\n", imm, u_inst.rd);
             cpu.reg[u_inst.rd] = cpu.pc + imm;
-            pc += 4;
+            cpu.pc += 4;
             break;
         case OP_OP:
             printf("OP_OP\n");
@@ -178,23 +179,78 @@ int main(){
                         printf("Not Implemented!\n");
                 }
             }
-            pc += 4;
+            cpu.pc += 4;
             break;
         case OP_JAL:
             decode_get_j_type(inst, &j_inst);
             imm = decode_get_j_imm(inst);
             printf("JAL: imm:%d rd:%d\n", imm, j_inst.rd);
-            cpu.reg[j_inst.rd] = pc+4;
-            pc += imm;
+            cpu.reg[j_inst.rd] = cpu.pc+4;
+            cpu.pc += imm;
             break;
         case OP_JALR:
             decode_get_i_type(inst, &i_inst);
             imm = decode_get_i_imm(inst);
             printf("JALR: imm:%d rs1:%d rd:%d\n", imm, i_inst.rs1, i_inst.rd);
-            cpu.reg[i_inst.rd] = pc+4;
-            pc += cpu.reg[i_inst.rs1] + imm;
+            cpu.reg[i_inst.rd] = cpu.pc+4;
+            cpu.pc = cpu.reg[i_inst.rs1] + imm;
             break;
         case OP_BRANCH:
+            printf("OP_BRANCH\n");
+            decode_get_b_type(inst, &b_inst);
+            imm = decode_get_b_imm(inst);
+            rs1_s = (int32_t)cpu.reg[b_inst.rs1];
+            rs2_s = (int32_t)cpu.reg[b_inst.rs2];
+            switch(b_inst.funct3){
+                case FUNCT3_BEQ:
+                    printf("BEQ: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(cpu.reg[b_inst.rs1] == cpu.reg[b_inst.rs2]) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+                case FUNCT3_BNE:
+                    printf("BNE: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(cpu.reg[b_inst.rs1] != cpu.reg[b_inst.rs2]) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+                case FUNCT3_BLT:
+                    printf("BLT: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(rs1_s < rs2_s) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+                case FUNCT3_BLTU:
+                    printf("BLTU: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(cpu.reg[b_inst.rs1] < cpu.reg[b_inst.rs2]) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+                case FUNCT3_BGE:
+                    printf("BGE: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(rs1_s >= rs2_s) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+                case FUNCT3_BGEU:
+                    printf("BGEU: imm:%d rs1:%d rs2:%d\n", imm, b_inst.rs1, b_inst.rs2);
+                    if(cpu.reg[b_inst.rs1] >= cpu.reg[b_inst.rs2]) {                        
+                        cpu.pc += imm;
+                    }else{
+                        cpu.pc += 4;
+                    }
+                    break;
+            }
             break;
         default:
             printf("Not Implemented!\n");

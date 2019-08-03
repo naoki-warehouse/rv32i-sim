@@ -26,14 +26,20 @@ int main(){
     init_cpu(&cpu);
     uint32_t inst = 0xfff08013;
 
+    uint32_t imm=0;
+    struct i_type i_inst;
+    struct u_type u_inst;
+    struct r_type r_inst;
+    int32_t rs1_s;
+    int32_t rs2_s;
+    uint8_t shamt;
     switch(decode_get_opcode(inst)){
         case OP_IMM:
             printf("OP_IMM\n");
-            struct i_type i_inst;
             decode_get_i_type(inst, &i_inst);
-            uint32_t imm = decode_get_i_imm(inst);
-            uint8_t shamt = get_bits(imm, 0, 4);
-            int32_t rs1_s = (int32_t)cpu.reg[i_inst.rs1];
+            imm = decode_get_i_imm(inst);
+            shamt = get_bits(imm, 0, 4);
+            rs1_s = (int32_t)cpu.reg[i_inst.rs1];
             switch(i_inst.funct3){
                 case FUNCT3_ADDI:
                     printf("ADDI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
@@ -90,16 +96,85 @@ int main(){
             break;
         case OP_LUI:
             printf("OP_LUI\n");
-            struct u_type u_inst;
             decode_get_u_type(inst, &u_inst);
-            uint32_t imm = decode_get_u_imm(inst);
+            imm = decode_get_u_imm(inst);
+            printf("LUI: imm:%d rd:%d\n", imm, u_inst.rd);
             cpu.reg[u_inst.rd] = imm;
+            break;
         case OP_AUIPC:
             printf("OP_AUIPC\n");
-            struct u_type u_inst;
             decode_get_u_type(inst, &u_inst);
-            uint32_t imm = decode_get_u_imm(inst);
+            imm = decode_get_u_imm(inst);
+            printf("AUIPC: imm:%d rd:%d\n", imm, u_inst.rd);
             cpu.reg[u_inst.rd] = cpu.pc + imm;
+            break;
+        case OP_OP:
+            printf("OP_OP\n");
+            decode_get_r_type(inst, &r_inst);
+            shamt = get_bits(cpu.reg[r_inst.rs2], 0, 4);
+            if(r_inst.funct7 == 0b0000000){
+                switch(r_inst.funct3){
+                    case FUNCT3_ADD:
+                        printf("ADD: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1] + cpu.reg[r_inst.rs2];
+                        break;
+                    case FUNCT3_SLT:
+                        printf("SLT: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        rs1_s = (int32_t)cpu.reg[r_inst.rs1];
+                        rs2_s = (int32_t)cpu.reg[r_inst.rs2];
+                        if(rs1_s < rs2_s){
+                            cpu.reg[r_inst.rd] = 1;
+                        }else{
+                            cpu.reg[r_inst.rd] = 0;
+                        }
+                        break;
+                    case FUNCT3_SLTU:
+                        printf("SLTU: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        if(cpu.reg[r_inst.rs1] < cpu.reg[r_inst.rs2]){
+                            cpu.reg[r_inst.rd] = 1;
+                        }else{
+                            cpu.reg[r_inst.rd] = 1;
+                        }
+                        break;
+                    case FUNCT3_AND:
+                        printf("AND: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1]&cpu.reg[r_inst.rs2];
+                        break;
+                    case FUNCT3_OR:
+                        printf("OR: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1]|cpu.reg[r_inst.rs2];
+                        break;
+                    case FUNCT3_XOR:
+                        printf("XOR: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1]^cpu.reg[r_inst.rs2];
+                        break;
+                    case FUNCT3_SLL:
+                        printf("SLL: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1] << shamt;
+                        break;
+                    case FUNCT3_SRL:
+                        printf("SRL: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1] >> shamt;
+                        break;
+                    default:
+                        printf("Not Implemented!\n");
+                }
+            }else if(r_inst.funct7 == 0b0100000){
+                rs1_s = (int32_t)cpu.reg[r_inst.rs1];
+                switch(r_inst.funct3){
+                    case FUNCT3_SUB:
+                        printf("SUB: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = cpu.reg[r_inst.rs1]-cpu.reg[r_inst.rs2];
+                        break;
+                    case FUNCT3_SRA:
+                        printf("SRA: rs1:%d rs2:%d rd:%d\n", r_inst.rs1, r_inst.rs2, r_inst.rd);
+                        cpu.reg[r_inst.rd] = rs1_s >> shamt;
+                        break;
+                    default:
+                        printf("Not Implemented!\n");
+                }
+            }
+            break;
         default:
             printf("Not Implemented!\n");
     }

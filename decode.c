@@ -25,6 +25,12 @@ uint8_t decode_get_opcode(uint32_t inst){
 }
 
 void decode_get_r_type(uint32_t inst, struct r_type *r){
+    r->funct7 = get_funct7(inst);
+    r->rs2 = get_rs2(inst);
+    r->rs1 = get_rs1(inst);
+    r->funct3 = get_funct3(inst);
+    r->rd = get_rd(inst);
+    r->opcode = get_opcode(inst);
 }
 
 void decode_get_i_type(uint32_t inst, struct i_type *i){

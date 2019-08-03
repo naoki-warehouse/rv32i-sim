@@ -3,6 +3,7 @@
 #include "inst.h"
 #include "decode.h"
 #include "cpu.h"
+#include "utils.h"
 
 void print_bin(uint32_t v, int bit_len) {
     for(int i=bit_len;i>0;i--){
@@ -28,9 +29,11 @@ int main(){
     switch(decode_get_opcode(inst)){
         case OP_IMM:
             printf("OP_IMM\n");
-            uint32_t imm = decode_get_i_imm(inst);
             struct i_type i_inst;
             decode_get_i_type(inst, &i_inst);
+            uint32_t imm = decode_get_i_imm(inst);
+            uint8_t shamt = get_bits(imm, 0, 4);
+            int32_t rs1_s = (int32_t)cpu.reg[i_inst.rs1];
             switch(i_inst.funct3){
                 case FUNCT3_ADDI:
                     printf("ADDI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
@@ -39,8 +42,7 @@ int main(){
                 case FUNCT3_SLTI:
                     printf("SLTI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
                     int32_t imm_s = (int32_t)imm;
-                    int32_t reg_s = (int32_t)cpu.reg[i_inst.rs1];
-                    if(reg_s < imm_s) {
+                    if(rs1_s < imm_s) {
                         cpu.reg[i_inst.rd] = 1;
                     }else{
                         cpu.reg[i_inst.rd] = 0;
@@ -65,6 +67,22 @@ int main(){
                 case FUNCT3_XORI:
                     printf("XORI: imm:%d rs1:%d, rd:%d\n", imm, i_inst.rs1, i_inst.rd);
                     cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]^imm;
+                    break;
+                case FUNCT3_SLLI:
+                    if(get_bits(imm, 5, 11) != 0b0000000) break;
+                    printf("SLLI: shamt:%d rs1:%d, rd:%d\n", shamt, i_inst.rs1, i_inst.rd);
+                    cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]<<shamt;
+                    break;
+                case FUNCT3_SRL:
+                    if(get_bits(imm, 5, 11) == 0b0000000){
+                        //SRLI
+                        printf("SRLI: shamt:%d rs1:%d, rd:%d\n", shamt, i_inst.rs1, i_inst.rd);
+                        cpu.reg[i_inst.rd] = cpu.reg[i_inst.rs1]>>shamt;
+                    }else if(get_bits(imm, 5, 11) != 0b0100000){
+                        //SRAI
+                        printf("SRAI: shamt:%d rs1:%d, rd:%d\n", shamt, i_inst.rs1, i_inst.rd);
+                        cpu.reg[i_inst.rd] = rs1_s>>shamt;
+                    }
                     break;
                 default:
                     printf("Not Implemented!\n");
